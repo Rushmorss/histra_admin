@@ -51,25 +51,6 @@ export default function Sidebar({ activeTab, onTabChange }: SidebarProps) {
           </button>
         ))}
       </div>
-
-      <div className="mt-auto flex flex-col gap-4">
-        <button className="w-full bg-primary text-on-primary font-label text-sm font-bold py-3.5 px-4 rounded-xl hover:bg-primary/90 transition-colors shadow-lg shadow-primary/10 flex items-center justify-center gap-2">
-          <Plus className="w-4 h-4" />
-          New Entry
-        </button>
-        
-        <div className="flex items-center gap-3 px-4 py-3 bg-surface-container-highest/50 rounded-2xl border border-outline-variant/10">
-          <img 
-            alt="Admin User" 
-            className="w-10 h-10 rounded-full object-cover border border-primary/20 shadow-sm" 
-            src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=2070&auto=format&fit=crop" 
-          />
-          <div className="flex flex-col">
-            <span className="font-label text-sm font-bold text-on-surface">Admin User</span>
-            <span className="font-body text-[10px] text-on-surface-variant font-medium">System Master</span>
-          </div>
-        </div>
-      </div>
     </nav>
   );
 }

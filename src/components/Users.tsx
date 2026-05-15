@@ -3,7 +3,6 @@ import { Search, Filter, Shield, ShieldAlert, Trash2, Mail, Calendar, CheckCircl
 import { motion } from "motion/react";
 import { cn } from "../lib/utils";
 import api from "../lib/api";
-
 export default function Users() {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
