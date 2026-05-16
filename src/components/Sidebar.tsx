@@ -28,7 +28,7 @@ export default function Sidebar({ activeTab, onTabChange }: SidebarProps) {
   return (
     <nav className="h-screen w-64 fixed left-0 top-0 bg-surface-container-low flex flex-col p-4 gap-2 z-50">
       <div className="px-4 py-6 mb-4 flex flex-col gap-1">
-        <div className="font-headline text-2xl font-black text-primary tracking-tight">HISTRA Admin</div>
+        <div className="font-headline text-2xl font-black text-primary tracking-tight">HISTRA ADMIN</div>
         <div className="text-[10px] text-on-surface-variant font-label tracking-widest uppercase font-bold opacity-70">
           The Modern Pathfinder
         </div>

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Search, Filter, Shield, ShieldAlert, Trash2, Mail, Calendar, CheckCircle2, XCircle } from "lucide-react";
 import { motion } from "motion/react";
-import { cn } from "../lib/utils";
+import { cn, resolveImageUrl } from "../lib/utils";
 import api from "../lib/api";
 export default function Users() {
   const [users, setUsers] = useState<any[]>([]);
@@ -113,7 +113,7 @@ export default function Users() {
                     <div className="flex items-center gap-5">
                       <div className="w-14 h-14 rounded-2xl overflow-hidden bg-surface-container-high border border-outline-variant/10 shrink-0">
                         <img 
-                          src={user.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.fullName || user.username)}&background=6366f1&color=fff`} 
+                          src={resolveImageUrl(user.avatarUrl || user.avatar || user.profileImage) || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.fullName || user.username)}&background=6366f1&color=fff`} 
                           className="w-full h-full object-cover" 
                           alt={user.username} 
                         />

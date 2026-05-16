@@ -2,9 +2,8 @@ import { useEffect, useState } from "react";
 import { Search, Trash2, MessageSquare, ThumbsUp, MapPin, Image as ImageIcon } from "lucide-react";
 import { motion } from "motion/react";
 import api from "../lib/api";
+import { resolveImageUrl } from "../lib/utils";
 
-// Thay thế đúng Port backend của bạn tại đây (Ví dụ: http://localhost:5000)
-const BASE_URL = "http://localhost:5000"; 
 
 export default function Content() {
   const [posts, setPosts] = useState<any[]>([]);
@@ -33,15 +32,38 @@ export default function Content() {
     return () => clearTimeout(timer);
   }, [keyword, page]);
 
-  // Hàm chuẩn hóa URL để hiển thị ảnh từ server
-  const getFullImageUrl = (url: string) => {
-    if (!url) return "";
-    if (url.startsWith('http://') || url.startsWith('https://')) {
-      return url;
-    }
-    // Nếu đường dẫn dạng /uploads/abc.png hoặc uploads/abc.png
-    const cleanUrl = url.startsWith('/') ? url : `/${url}`;
-    return `${BASE_URL}${cleanUrl}`;
+  const resolvePostImage = (post: any) => {
+    if (!post) return "";
+    return (
+      post.thumbnailUrl ||
+      post.image ||
+      post.coverImage ||
+      post.cover ||
+      post.photo ||
+      (post.mediaFiles?.[0] && (
+        post.mediaFiles[0].fileUrl ||
+        post.mediaFiles[0].url ||
+        post.mediaFiles[0].thumbnailUrl ||
+        post.mediaFiles[0].path ||
+        post.mediaFiles[0].file_path ||
+        post.mediaFiles[0].imageUrl ||
+        post.mediaFiles[0].image ||
+        post.mediaFiles[0].src ||
+        post.mediaFiles[0].source
+      )) ||
+      ""
+    );
+  };
+
+  const resolveUserAvatar = (user: any) => {
+    return resolveImageUrl(
+      user?.avatarUrl ||
+      user?.avatar ||
+      user?.profileImage ||
+      user?.avatar_url ||
+      user?.photo ||
+      user?.picture
+    );
   };
 
   const handleDelete = async (postId: string) => {
@@ -86,12 +108,12 @@ export default function Content() {
           ) : posts.map((post: any, i: number) => {
             
             // LOGIC LẤY ẢNH BÀI ĐĂNG: 
-            // Ưu tiên thumbnailUrl, nếu không có thì lấy fileUrl của phần tử đầu tiên trong mảng mediaFiles
-            const rawImgUrl = post.thumbnailUrl || (post.mediaFiles && post.mediaFiles[0]?.fileUrl);
-            const displayImage = getFullImageUrl(rawImgUrl);
+            const rawImgUrl = resolvePostImage(post);
+            const displayImage = resolveImageUrl(rawImgUrl);
+            const hasImage = Boolean(rawImgUrl);
             
             // LOGIC LẤY AVATAR USER
-            const displayAvatar = getFullImageUrl(post.user?.avatarUrl);
+            const displayAvatar = resolveUserAvatar(post.user);
 
             return (
               <motion.div 
@@ -99,34 +121,27 @@ export default function Content() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
                 key={post.id} 
-                className="bg-surface-container-low rounded-[2.5rem] p-8 border border-outline-variant/10 shadow-xl shadow-on-surface/5 flex flex-col lg:flex-row gap-8 group"
+                className={`bg-surface-container-low rounded-[2.5rem] p-8 border border-outline-variant/10 shadow-xl shadow-on-surface/5 flex flex-col ${hasImage ? 'lg:flex-row' : ''} gap-8 group`}
               >
                 {/* KHU VỰC ẢNH BÀI ĐĂNG */}
-                <div className="w-full lg:w-72 h-52 rounded-3xl overflow-hidden bg-surface-container-high border border-outline-variant/10 shrink-0 relative flex items-center justify-center">
-                  {rawImgUrl ? (
+                {hasImage && (
+                  <div className="w-full lg:w-72 h-52 rounded-3xl overflow-hidden bg-surface-container-high border border-outline-variant/10 shrink-0 relative flex items-center justify-center">
                     <img 
                       src={displayImage} 
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
                       alt={post.title || "Post media"} 
                       onError={(e) => { 
-                        // Nếu ảnh lỗi thì thay bằng ảnh giữ chỗ tạm thời
                         e.currentTarget.src = "https://placehold.co/600x400?text=Image+Not+Found"; 
                       }}
                     />
-                  ) : (
-                    <div className="flex flex-col items-center gap-2 opacity-20">
-                      <ImageIcon className="w-12 h-12" />
-                      <span className="text-[10px] font-black uppercase tracking-widest">No Media</span>
-                    </div>
-                  )}
 
-                  {/* Hiển thị badge số lượng media nếu có mảng mediaFiles */}
-                  {post.mediaFiles && post.mediaFiles.length > 0 && (
-                    <div className="absolute top-4 left-4 bg-black/50 backdrop-blur-md px-3 py-1.5 rounded-xl font-label text-[10px] font-black uppercase tracking-widest text-white border border-white/10 shadow-lg">
-                       {post.mediaFiles.length} MEDIA
-                    </div>
-                  )}
-                </div>
+                    {post.mediaFiles && post.mediaFiles.length > 0 && (
+                      <div className="absolute top-4 left-4 bg-black/50 backdrop-blur-md px-3 py-1.5 rounded-xl font-label text-[10px] font-black uppercase tracking-widest text-white border border-white/10 shadow-lg">
+                         {post.mediaFiles.length} MEDIA
+                      </div>
+                    )}
+                  </div>
+                )}
                 
                 {/* THÔNG TIN BÀI ĐĂNG */}
                 <div className="flex-1 flex flex-col">
@@ -136,7 +151,7 @@ export default function Content() {
                        {/* KHU VỰC AVATAR USER */}
                        <div className="w-10 h-10 rounded-full overflow-hidden bg-surface-container-high border border-outline-variant/20 shrink-0">
                          <img 
-                            src={post.user?.avatarUrl ? displayAvatar : `https://ui-avatars.com/api/?name=${encodeURIComponent(post.user?.fullName || post.user?.username || 'U')}&background=random`} 
+                            src={displayAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(post.user?.fullName || post.user?.username || 'U')}&background=random`} 
                             className="w-full h-full object-cover" 
                             alt="avatar"
                             onError={(e) => {
